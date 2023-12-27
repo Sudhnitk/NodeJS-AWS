@@ -1,0 +1,27 @@
+service: S3-task
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1  
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: "arn:aws:s3:::myintro-bucket/*"
+      
+functions:
+  uploadFile:
+    handler: handler.uploadFile
+    events:
+      - http:
+          path: uploadFile
+          method: post
+  fetchFile:
+    handler: handler.fetchData
+    events:  
+      - http:
+          path: fetchData/{fileName}
+          method: get
+

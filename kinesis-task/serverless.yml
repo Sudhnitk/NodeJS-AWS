@@ -1,0 +1,36 @@
+service: kinesis-task
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - firehose:PutRecord
+      Resource: "arn:aws:firehose:us-east-1:657750297473:deliverystream/myDeliveryStream3"
+
+functions:
+  sendToFirehose2:
+    handler: handler.sendToFirehose2
+    events:
+      - http:
+          path: sendToFirehose2
+          method: post 
+      - firehose:
+          arn: "arn:aws:firehose:us-east-1:657750297473:deliverystream/myDeliveryStream3"
+
+resources:
+  Resources:
+    MyDeliveryStream:
+      Type: AWS::KinesisFirehose::DeliveryStream
+      Properties:
+        DeliveryStreamName: myDeliveryStream3
+        DeliveryStreamType: DirectPut 
+        S3DestinationConfiguration:
+          BucketARN: "arn:aws:s3:::my-management-bucket"
+          RoleARN: "arn:aws:iam::657750297473:role/firehoseDelivery"
+          Prefix: "firehose-data/"
+          BufferingHints:
+            SizeInMBs: 5
+            IntervalInSeconds: 300
